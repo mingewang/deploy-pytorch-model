@@ -19,7 +19,9 @@ from torchvision.models import resnet50
 # Initialize our Flask application and the PyTorch model.
 app = flask.Flask(__name__)
 model = None
-use_gpu = True
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print('Using device:', device)
+use_gpu = True if torch.cuda.is_available() else False
 
 with open('imagenet_class.txt', 'r') as f:
     idx2label = eval(f.read())
@@ -85,7 +87,7 @@ def predict():
 
             # Loop over the results and add them to the list of returned predictions
             for prob, label in zip(results[0][0], results[1][0]):
-                label_name = idx2label[label]
+                label_name = idx2label[label.item()]
                 r = {"label": label_name, "probability": float(prob)}
                 data['predictions'].append(r)
 
